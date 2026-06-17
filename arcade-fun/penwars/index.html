@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Arcade-PenWars — Arcade.fun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Bangers&family=Patrick+Hand&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  /* ── Back to Arcade button ── */
+  #back-to-arcade {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Patrick Hand', cursive;
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    color: rgba(255, 217, 94, 0.8);
+    background: rgba(10, 20, 10, 0.75);
+    border: 1px solid rgba(255, 217, 94, 0.28);
+    border-radius: 8px;
+    padding: 7px 13px;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    transition: color 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+    opacity: 0.7;
+  }
+  #back-to-arcade:hover {
+    color: #ffd95e;
+    border-color: rgba(255, 217, 94, 0.65);
+    box-shadow: 0 0 14px rgba(255, 217, 94, 0.22);
+    opacity: 1;
+  }
+</style>
+</head>
+<body>
+
+<!-- ── Back to Arcade hub ── -->
+<a id="back-to-arcade" href="../index.html">◀ ARCADE.FUN</a>
+
+<!-- ============ LOADING ============ -->
+<section id="screen-loading" class="screen active">
+  <div class="loading-box">
+    <div class="pen-spin">🖊️</div>
+    <h1 class="logo">PEN <em>FIGHT</em> 3D</h1>
+    <div class="load-bar"><div id="loadFill"></div></div>
+    <p id="loadText" class="chalk-dim">SHARPENING PENS…</p>
+  </div>
+</section>
+
+<!-- ============ HOME ============ -->
+<section id="screen-home" class="screen">
+  <header class="top-bar">
+    <button id="muteBtn" class="icon-btn">🔊</button>
+    <input id="volSlider" type="range" min="0" max="100" value="60" />
+  </header>
+  <div class="center-col">
+    <h1 class="logo big">PEN <em>FIGHT</em> 3D</h1>
+    <p class="tagline">— the legendary school bench battle —</p>
+    <div class="menu">
+      <button class="btn primary" data-nav="mode">✏️ PLAY</button>
+      <button class="btn" data-nav="records">🏆 RECORDS</button>
+      <button class="btn" data-nav="help">❓ HOW TO PLAY</button>
+    </div>
+    <p class="chalk-dim doodle">"back-bencher approved since forever"</p>
+  </div>
+</section>
+
+<!-- ============ MODE ============ -->
+<section id="screen-mode" class="screen">
+  <h2 class="screen-title">CHOOSE BATTLE MODE</h2>
+  <div class="card-grid modes">
+    <div class="card" data-pick-mode="friend">
+      <span class="big-icon">👫</span>
+      <h3>VS FRIENDS</h3>
+      <p>2 – 8 players. ALL pens on the bench at once — take turns flicking, last pen standing wins!</p>
+    </div>
+    <div class="card" data-pick-mode="cpu">
+      <span class="big-icon">🤖</span>
+      <h3>VS COMPUTER</h3>
+      <p>Battle the class topper bot. Three difficulty levels.</p>
+    </div>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-nav="home">◀ BACK</button></div>
+</section>
+
+<!-- ============ PLAYER COUNT ============ -->
+<section id="screen-playercount" class="screen">
+  <h2 class="screen-title">HOW MANY PLAYERS?</h2>
+  <p class="chalk-dim pc-sub">ALL pens stay on the bench — last one standing wins each round!</p>
+  <div class="playercount-grid">
+    <button class="pc-btn" data-count="2"><span class="pc-num">2</span><span class="pc-desc">CLASSIC DUEL</span></button>
+    <button class="pc-btn" data-count="3"><span class="pc-num">3</span><span class="pc-desc">3-WAY BRAWL</span></button>
+    <button class="pc-btn" data-count="4"><span class="pc-num">4</span><span class="pc-desc">SQUAD FIGHT</span></button>
+    <button class="pc-btn" data-count="5"><span class="pc-num">5</span><span class="pc-desc">GANG RUMBLE</span></button>
+    <button class="pc-btn" data-count="6"><span class="pc-num">6</span><span class="pc-desc">FULL BENCH</span></button>
+    <button class="pc-btn" data-count="7"><span class="pc-num">7</span><span class="pc-desc">LUCKY 7</span></button>
+    <button class="pc-btn" data-count="8"><span class="pc-num">8</span><span class="pc-desc">CLASS WAR</span></button>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-nav="mode">◀ BACK</button></div>
+</section>
+
+<!-- ============ PEN SELECT ============ -->
+<section id="screen-pens" class="screen">
+  <h2 class="screen-title" id="penTitle">CHOOSE YOUR PEN</h2>
+  <div id="nameRow" class="name-row">
+    <input id="playerNameInput" class="name-input" type="text" maxlength="14"
+           placeholder="YOUR NAME" autocomplete="off" spellcheck="false" />
+  </div>
+  <div id="setupPips" class="setup-pips"></div>
+  <div id="penGrid" class="card-grid"></div>
+  <div class="nav-row">
+    <button class="btn ghost" id="penBack">◀ BACK</button>
+    <button id="penNext" class="btn primary" disabled>NEXT ▶</button>
+  </div>
+</section>
+
+<!-- ============ CONFIG ============ -->
+<section id="screen-config" class="screen">
+  <h2 class="screen-title">MATCH SETTINGS</h2>
+  <div class="config-panel">
+    <div class="config-row" id="roundRow">
+      <label>ROUNDS</label>
+      <div class="seg" id="roundSeg">
+        <button data-rounds="1">QUICK (1)</button>
+        <button data-rounds="3" class="on">BEST OF 3</button>
+        <button data-rounds="5">BEST OF 5</button>
+      </div>
+    </div>
+    <div class="config-row" id="targetWinRow" style="display:none">
+      <label>WIN TARGET</label>
+      <div class="seg" id="targetWinSeg">
+        <button data-tw="2">FIRST TO 2</button>
+        <button data-tw="3" class="on">FIRST TO 3</button>
+        <button data-tw="5">FIRST TO 5</button>
+      </div>
+    </div>
+    <div class="config-row">
+      <label>BENCH SIZE</label>
+      <div class="seg" id="benchSeg">
+        <button data-bench="small">SMALL</button>
+        <button data-bench="medium" class="on">MEDIUM</button>
+        <button data-bench="large">LARGE</button>
+      </div>
+    </div>
+    <div class="config-row" id="aiRow">
+      <label>BOT LEVEL</label>
+      <div class="seg" id="aiSeg">
+        <button data-ai="easy">EASY</button>
+        <button data-ai="medium" class="on">MEDIUM</button>
+        <button data-ai="hard">HARD</button>
+      </div>
+    </div>
+    <div class="summary" id="configSummary"></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn ghost" id="configBack">◀ BACK</button>
+    <button class="btn primary glow" id="startBtn">⚔️ START THE FIGHT</button>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="screen-game" class="screen">
+  <div id="three-wrap"></div>
+
+  <!-- 2-player HUD -->
+  <div class="hud" id="hud-2p">
+    <div class="hud-player p1"><span id="hudP1Name">P1</span><b id="hudP1Score">0</b></div>
+    <div class="hud-mid">
+      <span id="hudRound">ROUND 1</span>
+      <span id="turnBanner" class="turn-banner">PLAYER 1'S TURN</span>
+    </div>
+    <div class="hud-player p2"><b id="hudP2Score">0</b><span id="hudP2Name">P2</span></div>
+  </div>
+
+  <!-- Battle-royale HUD -->
+  <div id="hud-br" class="hud-br" style="display:none">
+    <div class="hud-mid br-mid">
+      <span id="hudRoundBR">ROUND 1</span>
+      <span id="turnBannerBR" class="turn-banner">PLAYER 1'S TURN</span>
+    </div>
+  </div>
+  <div id="hud-queue" class="hud-queue" style="display:none"></div>
+
+  <div class="power-wrap">
+    <div class="power-bar"><div id="powerFill"></div></div>
+    <span>POWER</span>
+  </div>
+  <p id="hint" class="hint">Drag back from your pen to aim — release to flick!</p>
+  <button id="pauseBtn" class="icon-btn game-pause">⏸</button>
+</section>
+
+<!-- ============ PAUSE ============ -->
+<div id="overlay-pause" class="overlay">
+  <div class="overlay-box">
+    <h2>PAUSED</h2>
+    <button class="btn primary" id="resumeBtn">▶ RESUME</button>
+    <button class="btn" id="restartBtn">⟲ RESTART MATCH</button>
+    <button class="btn ghost" id="quitBtn">✕ QUIT</button>
+  </div>
+</div>
+
+<!-- ============ ROUND OVER ============ -->
+<div id="overlay-round" class="overlay">
+  <div class="overlay-box">
+    <h2 id="roundMsg">PLAYER 1 WINS THE ROUND!</h2>
+    <p id="roundSub" class="chalk-dim"></p>
+    <button class="btn primary" id="nextRoundBtn">NEXT ROUND ▶</button>
+  </div>
+</div>
+
+<!-- ============ KING OF THE HILL STANDINGS ============ -->
+<div id="overlay-standings" class="overlay">
+  <div class="overlay-box standings-box">
+    <h2>STANDINGS</h2>
+    <div id="standingsList"></div>
+    <p id="nextMatchInfo" class="chalk-dim next-match"></p>
+    <button class="btn primary" id="continueKohBtn">NEXT MATCH</button>
+  </div>
+</div>
+
+<!-- ============ MATCH OVER ============ -->
+<section id="screen-matchover" class="screen">
+  <div class="center-col">
+    <h2 class="logo" id="winnerTitle">🏆 PLAYER 1 WINS!</h2>
+    <p id="finalScore" class="final-score">2 — 1</p>
+    <p id="matchSub" class="chalk-dim"></p>
+    <div id="tourneyFinalStandings" class="tourney-final-standings" style="display:none"></div>
+    <div class="menu">
+      <button class="btn primary" id="rematchBtn">⚔️ REMATCH</button>
+      <button class="btn" data-nav="mode">🔄 NEW MATCH</button>
+      <button class="btn ghost" data-nav="home">⌂ HOME</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ RECORDS ============ -->
+<section id="screen-records" class="screen">
+  <h2 class="screen-title">🏆 BENCH RECORDS</h2>
+  <ol id="recordList" class="record-list"></ol>
+  <div class="nav-row">
+    <button class="btn ghost" data-nav="home">◀ BACK</button>
+    <button class="btn danger" id="clearRecords">CLEAR</button>
+  </div>
+</section>
+
+<!-- ============ HELP ============ -->
+<section id="screen-help" class="screen">
+  <h2 class="screen-title">HOW TO PLAY</h2>
+  <div class="help-panel">
+    <p>🎯 <b>Goal:</b> knock every other pen <b>off the bench</b>. Last pen standing wins the round!</p>
+    <p>👆 <b>Flick:</b> press on <b>your own pen</b>, drag backwards like a slingshot, and release.</p>
+    <ul>
+      <li>🔄 Players take turns in order — one flick each.</li>
+      <li>⚖️ All pens stay on the bench the whole time — it's a free-for-all!</li>
+      <li>🎯 Aim at any opponent's pen. Chain reactions are the best!</li>
+      <li>🌪️ Watch out — your own pen can fly off if you aim badly.</li>
+      <li>💛 Yellow dots preview your path. Red ring = dangerously close to the edge.</li>
+      <li>👑 Win enough rounds to claim the match — check the scoreboard!</li>
+    </ul>
+    <p>⌨️ <kbd>P</kbd> or <kbd>Esc</kbd> to pause mid-match.</p>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-nav="home">◀ BACK</button></div>
+</section>
+
+<div id="impact-flash"></div>
+<div id="confetti"></div>
+
+<script src="https://unpkg.com/three@0.149.0/build/three.min.js"></script>
+<script src="js/audio.js"></script>
+<script src="js/data.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>

@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Aeroring-Arcade — Arcade.fun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;800;900&family=Rajdhani:wght@400;500;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="css/style.css" />
+<style>
+  /* ── Back to Arcade button ── */
+  #back-to-arcade {
+    position: fixed;
+    top: 14px;
+    left: 14px;
+    z-index: 9999;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-family: 'Orbitron', sans-serif;
+    font-size: 0.58rem;
+    font-weight: 700;
+    letter-spacing: 0.18em;
+    color: rgba(0, 229, 255, 0.75);
+    background: rgba(4, 3, 14, 0.72);
+    border: 1px solid rgba(0, 229, 255, 0.22);
+    border-radius: 8px;
+    padding: 7px 13px;
+    text-decoration: none;
+    backdrop-filter: blur(10px);
+    transition: color 0.15s, border-color 0.15s, box-shadow 0.15s, opacity 0.15s;
+    opacity: 0.7;
+  }
+  #back-to-arcade:hover {
+    color: #00e5ff;
+    border-color: rgba(0, 229, 255, 0.6);
+    box-shadow: 0 0 14px rgba(0, 229, 255, 0.25);
+    opacity: 1;
+  }
+  #back-to-arcade .arrow { font-size: 0.8rem; }
+</style>
+</head>
+<body>
+
+<!-- ── Back to Arcade hub ── -->
+<a id="back-to-arcade" href="../index.html">
+  <span class="arrow">◀</span>
+  <span>ARCADE.FUN</span>
+</a>
+
+<canvas id="bgStars"></canvas>
+
+<!-- ============ LOADING SCREEN ============ -->
+<section id="screen-loading" class="screen active">
+  <div class="loading-box">
+    <div class="logo-ring"><span></span></div>
+    <h1 class="game-logo">AERO<em>RING</em></h1>
+    <div class="load-bar"><div id="loadFill" class="load-fill"></div></div>
+    <p id="loadText" class="load-text">INITIALIZING SYSTEMS…</p>
+  </div>
+</section>
+
+<!-- ============ HOME SCREEN ============ -->
+<section id="screen-home" class="screen">
+  <header class="top-bar">
+    <button id="muteBtn" class="icon-btn" title="Toggle sound">🔊</button>
+    <input id="volSlider" type="range" min="0" max="100" value="60" class="vol-slider" title="Volume" />
+  </header>
+  <div class="center-col">
+    <h1 class="game-logo big">AERO<em>RING</em></h1>
+    <p class="tagline">SURVIVE • COLLECT • DOMINATE THE LANES</p>
+    <div class="menu">
+      <button class="btn primary" data-nav="pilots">▶ LAUNCH</button>
+      <button class="btn" data-nav="scores">🏆 HIGH SCORES</button>
+      <button class="btn" data-nav="help">❓ HOW TO PLAY</button>
+    </div>
+    <p class="best-line">PERSONAL BEST: <span id="homeBest">0</span></p>
+  </div>
+</section>
+
+<!-- ============ PILOT SELECT ============ -->
+<section id="screen-pilots" class="screen">
+  <h2 class="screen-title">SELECT YOUR PILOT</h2>
+  <div id="pilotGrid" class="card-grid"></div>
+  <div class="nav-row">
+    <button class="btn ghost" data-nav="home">◀ BACK</button>
+    <button id="pilotNext" class="btn primary" data-nav="modes" disabled>NEXT ▶</button>
+  </div>
+</section>
+
+<!-- ============ MODE SELECT ============ -->
+<section id="screen-modes" class="screen">
+  <h2 class="screen-title">SELECT GAME MODE</h2>
+  <div id="modeGrid" class="card-grid modes"></div>
+  <div class="nav-row">
+    <button class="btn ghost" data-nav="pilots">◀ BACK</button>
+    <button id="modeNext" class="btn primary" data-nav="config" disabled>NEXT ▶</button>
+  </div>
+</section>
+
+<!-- ============ CONFIG ============ -->
+<section id="screen-config" class="screen">
+  <h2 class="screen-title">FLIGHT CONFIGURATION</h2>
+  <div class="config-panel">
+    <div class="config-row">
+      <label>LANES</label>
+      <div class="seg" id="laneSeg">
+        <button data-lanes="3" class="on">3</button>
+        <button data-lanes="4">4</button>
+        <button data-lanes="5">5</button>
+      </div>
+    </div>
+    <div class="config-row">
+      <label>FRAME RATE</label>
+      <div class="seg" id="fpsSeg">
+        <button data-fps="30">30 FPS</button>
+        <button data-fps="60" class="on">60 FPS</button>
+        <button data-fps="0">UNCAPPED</button>
+      </div>
+    </div>
+    <div class="config-row">
+      <label>PARTICLES</label>
+      <div class="seg" id="fxSeg">
+        <button data-fx="low">LOW</button>
+        <button data-fx="high" class="on">HIGH</button>
+      </div>
+    </div>
+    <div class="summary" id="configSummary"></div>
+  </div>
+  <div class="nav-row">
+    <button class="btn ghost" data-nav="modes">◀ BACK</button>
+    <button id="startBtn" class="btn primary glow">🚀 ENTER ARENA</button>
+  </div>
+</section>
+
+<!-- ============ GAME ============ -->
+<section id="screen-game" class="screen">
+  <div class="hud">
+    <div class="hud-left">
+      <div class="hud-stat">SCORE <span id="hudScore">0</span></div>
+      <div class="hud-stat combo">COMBO <span id="hudCombo">x1</span></div>
+      <div class="hud-stat wave">WAVE <span id="hudWave">1</span></div>
+    </div>
+    <div class="hud-right">
+      <div class="exp-wrap" title="EXP — fills your ability">
+        <div class="exp-bar"><div id="expFill"></div></div>
+        <span id="abilityTag" class="ability-tag">CHARGING…</span>
+      </div>
+      <div id="buffRow" class="buff-row"></div>
+      <button id="pauseBtn" class="icon-btn">⏸</button>
+    </div>
+  </div>
+  <canvas id="gameCanvas"></canvas>
+  <div class="touch-zones">
+    <div id="touchLeft"></div>
+    <div id="touchAbility"></div>
+    <div id="touchRight"></div>
+  </div>
+</section>
+
+<!-- ============ PAUSE OVERLAY ============ -->
+<div id="overlay-pause" class="overlay">
+  <div class="overlay-box">
+    <h2>PAUSED</h2>
+    <button class="btn primary" id="resumeBtn">▶ RESUME</button>
+    <button class="btn" id="restartBtn">⟲ RESTART</button>
+    <button class="btn ghost" id="quitBtn">✕ QUIT TO MENU</button>
+  </div>
+</div>
+
+<!-- ============ GAME OVER ============ -->
+<section id="screen-gameover" class="screen">
+  <div class="center-col">
+    <h2 class="go-title">SHIP DESTROYED</h2>
+    <div class="go-stats">
+      <div class="go-stat"><label>FINAL SCORE</label><span id="goScore">0</span></div>
+      <div class="go-stat"><label>BEST COMBO</label><span id="goCombo">x1</span></div>
+      <div class="go-stat"><label>WAVE REACHED</label><span id="goWave">1</span></div>
+      <div class="go-stat"><label>RINGS</label><span id="goRings">0</span></div>
+    </div>
+    <p id="newRecord" class="new-record hidden">★ NEW RECORD! ★</p>
+    <div class="menu">
+      <button class="btn primary" id="goRetry">⟲ FLY AGAIN</button>
+      <button class="btn" data-nav="scores">🏆 HIGH SCORES</button>
+      <button class="btn ghost" data-nav="home">⌂ HOME</button>
+    </div>
+  </div>
+</section>
+
+<!-- ============ HIGH SCORES ============ -->
+<section id="screen-scores" class="screen">
+  <h2 class="screen-title">🏆 HALL OF PILOTS</h2>
+  <ol id="scoreList" class="score-list"></ol>
+  <div class="nav-row">
+    <button class="btn ghost" data-nav="home">◀ BACK</button>
+    <button class="btn danger" id="clearScores">CLEAR</button>
+  </div>
+</section>
+
+<!-- ============ HELP ============ -->
+<section id="screen-help" class="screen">
+  <h2 class="screen-title">HOW TO PLAY</h2>
+  <div class="help-panel">
+    <p>◀ ▶ / <b>A D</b> — switch lanes &nbsp;•&nbsp; <b>SPACE</b> — activate ability &nbsp;•&nbsp; <b>P / ESC</b> — pause</p>
+    <p>📱 On touch screens: tap left / right side to move, tap center to use your ability.</p>
+    <ul>
+      <li><b class="c-ring">◯ Rings</b> — collect for score, EXP and combo.</li>
+      <li><b class="c-hazard">▲ Hazards</b> — avoid! One hit destroys your ship.</li>
+      <li><b class="c-shield">🛡 Shield</b> — blocks one hit. <b class="c-slow">🐌 Slow</b> — slows time. <b class="c-magnet">🧲 Magnet</b> — attracts rings.</li>
+      <li><b>⚡ Ability</b> — fills with EXP. Ghost = invulnerable. Blast = clears hazards.</li>
+      <li><b>🌊 Waves</b> — every wave is faster and meaner. Survive!</li>
+    </ul>
+  </div>
+  <div class="nav-row"><button class="btn ghost" data-nav="home">◀ BACK</button></div>
+</section>
+
+<script src="js/audio.js"></script>
+<script src="js/data.js"></script>
+<script src="js/game.js"></script>
+</body>
+</html>
